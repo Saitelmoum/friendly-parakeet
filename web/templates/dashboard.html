@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Dashboard des offres</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; background: #f7f7f7; }
+        h1 { color: #1b4965; }
+        table { border-collapse: collapse; width: 100%; background: #fff; }
+        th, td { padding: 0.75rem 1rem; border-bottom: 1px solid #e0e0e0; text-align: left; }
+        th { background: #f0f4f8; }
+        .status { font-weight: bold; }
+        .status.brouillon { color: #555; }
+        .status.en\ revue { color: #8c6c00; }
+        .status.envoyée { color: #2d6a4f; }
+        .status.rejetée { color: #c1121f; }
+        .status.à\ modifier { color: #1d3557; }
+        .actions { display: flex; gap: 0.5rem; }
+        form { margin: 0; }
+        button { padding: 0.35rem 0.75rem; border: none; border-radius: 4px; cursor: pointer; }
+        .validate { background: #2d6a4f; color: white; }
+        .reject { background: #c1121f; color: white; }
+        .edit { background: #1d3557; color: white; }
+        .log { margin-top: 2rem; background: #fff; padding: 1rem; border-radius: 6px; }
+        .log-entry { margin: 0.35rem 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Offres</h1>
+    <table aria-label="Tableau des offres">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Titre</th>
+                <th>Statut</th>
+                <th>Destinataire</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for offer in offers %}
+            <tr>
+                <td>{{ offer.id }}</td>
+                <td>{{ offer.titre }}</td>
+                <td class="status {{ offer.statut|replace(' ', '\\ ') }}">{{ offer.statut }}</td>
+                <td>{{ offer.destinataire }}</td>
+                <td>
+                    <div class="actions">
+                        <form method="post" action="/offers/{{ offer.id }}/validate">
+                            <input type="hidden" name="user" value="utilisateur-demo">
+                            <button class="validate" type="submit">Valider</button>
+                        </form>
+                        <form method="post" action="/offers/{{ offer.id }}/reject">
+                            <input type="hidden" name="user" value="utilisateur-demo">
+                            <button class="reject" type="submit">Rejeter</button>
+                        </form>
+                        <form method="post" action="/offers/{{ offer.id }}/edit">
+                            <input type="hidden" name="user" value="utilisateur-demo">
+                            <button class="edit" type="submit">Modifier</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5">Aucune offre disponible.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <section class="log">
+        <h2>Journal des actions</h2>
+        {% if logs %}
+            {% for log in logs %}
+                <div class="log-entry">
+                    {{ log.timestamp }} — {{ log.user }} : {{ log.action }} sur l'offre {{ log.offer_id }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Aucune action enregistrée pour le moment.</p>
+        {% endif %}
+    </section>
+</body>
+</html>
